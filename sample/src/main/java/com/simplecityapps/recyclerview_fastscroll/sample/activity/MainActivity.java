@@ -17,19 +17,17 @@
 package com.simplecityapps.recyclerview_fastscroll.sample.activity;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.simplecityapps.recyclerview_fastscroll.sample.R;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 public class MainActivity extends AppCompatActivity {
+    private static final boolean IS_GRID_LAYOUT = true;
+    private static final int GRID_SPAN_COUNT = 3;
+    private static final int ITEM_COUNT = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,41 +35,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         FastScrollRecyclerView recyclerView = (FastScrollRecyclerView) findViewById(R.id.recycler);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(new RecyclerAdapter());
-    }
 
-    private static class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder>
-            implements FastScrollRecyclerView.SectionedAdapter {
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item, parent, false));
+        if (IS_GRID_LAYOUT) {
+            recyclerView.setLayoutManager(new GridLayoutManager(this, GRID_SPAN_COUNT));
+        } else {
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
         }
 
-        @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            holder.text.setText(String.format("Item %d", position));
-        }
-
-        @Override
-        public int getItemCount() {
-            return 100;
-        }
-
-        @NonNull
-        @Override
-        public String getSectionName(int position) {
-            return String.valueOf(position);
-        }
-
-        static class ViewHolder extends RecyclerView.ViewHolder {
-            public TextView text;
-
-            public ViewHolder(View itemView) {
-                super(itemView);
-                text = (TextView) itemView.findViewById(R.id.text);
-            }
-        }
+        recyclerView.setAdapter(new RecyclerAdapter(ITEM_COUNT));
     }
 }
