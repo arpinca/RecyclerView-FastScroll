@@ -16,62 +16,68 @@
 
 package com.simplecityapps.recyclerview_fastscroll.sample.activity;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.simplecityapps.recyclerview_fastscroll.sample.R;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 public class MainActivity extends AppCompatActivity {
+    RecyclerAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+
         FastScrollRecyclerView recyclerView = (FastScrollRecyclerView) findViewById(R.id.recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(new RecyclerAdapter());
+
+        int count = PrefsUtils.getItemCount(this);
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        count = PrefsUtils.getItemCount(this);
+
+        mAdapter = new RecyclerAdapter(PrefsUtils.getItemCount(this));
+        recyclerView.setAdapter(mAdapter);
+
+
     }
 
-    private static class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder>
-            implements FastScrollRecyclerView.SectionedAdapter {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_options_menu, menu);
+        return true;
+    }
 
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item, parent, false));
-        }
+    @Override
+    protected void onResume() {
+        super.onResume();
 
-        @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            holder.text.setText(String.format("Item %d", position));
-        }
+        mAdapter.updateCount(PrefsUtils.getItemCount(this));
+    }
 
-        @Override
-        public int getItemCount() {
-            return 100;
-        }
-
-        @NonNull
-        @Override
-        public String getSectionName(int position) {
-            return String.valueOf(position);
-        }
-
-        static class ViewHolder extends RecyclerView.ViewHolder {
-            public TextView text;
-
-            public ViewHolder(View itemView) {
-                super(itemView);
-                text = (TextView) itemView.findViewById(R.id.text);
-            }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 }

@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">RecyclerView-FastScroll</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="prefs_item_count">Item Count</string>
+    <string name="prefs_item_count_default">100</string>
+    <string name="prefs_item_count_summary">%1$s rows</string>
 </resources>
