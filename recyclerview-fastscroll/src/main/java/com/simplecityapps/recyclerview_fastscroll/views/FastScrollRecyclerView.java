@@ -230,8 +230,10 @@ public class FastScrollRecyclerView extends RecyclerView implements RecyclerView
         //If the position we wish to scroll to is, say, position 10.5, we scroll to position 10,
         //and then offset by 0.5 * rowHeight. This is how we achieve smooth scrolling.
         LinearLayoutManager layoutManager = ((LinearLayoutManager) getLayoutManager());
-        layoutManager.scrollToPositionWithOffset(spanCount * exactItemPos / mScrollPosState.rowHeight,
-                -(exactItemPos % mScrollPosState.rowHeight));
+        //layoutManager.scrollToPositionWithOffset(spanCount * (exactItemPos / mScrollPosState.rowHeight),
+        //         -(exactItemPos % mScrollPosState.rowHeight));
+        layoutManager.scrollToPositionWithOffset(0, (int) -(availableScrollHeight * touchFraction));
+
 
         if (!(getAdapter() instanceof SectionedAdapter)) {
             return "";
@@ -288,15 +290,17 @@ public class FastScrollRecyclerView extends RecyclerView implements RecyclerView
             return;
         }
 
-        View child = getChildAt(0);
+        View lastChild = getChildAt(getChildCount() - 1);
+        View firstChild = getChildAt(0);
 
-        stateOut.rowIndex = getChildAdapterPosition(child);
+        stateOut.rowIndex = getChildAdapterPosition(firstChild);
         if (getLayoutManager() instanceof GridLayoutManager) {
             stateOut.rowIndex = stateOut.rowIndex / ((GridLayoutManager) getLayoutManager()).getSpanCount();
         }
-        stateOut.rowTopOffset = getLayoutManager().getDecoratedTop(child);
-        stateOut.rowHeight = child.getHeight() + getLayoutManager().getTopDecorationHeight(child)
-                + getLayoutManager().getBottomDecorationHeight(child);
+        stateOut.rowTopOffset = getLayoutManager().getDecoratedTop(firstChild);
+        int height = lastChild.getHeight() + getLayoutManager().getTopDecorationHeight(lastChild)
+                + getLayoutManager().getBottomDecorationHeight(lastChild);
+        stateOut.rowHeight = height;
     }
 
     public void setThumbColor(@ColorInt int color) {

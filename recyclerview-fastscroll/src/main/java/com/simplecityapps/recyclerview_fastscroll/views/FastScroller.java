@@ -201,7 +201,7 @@ public class FastScroller {
                     String sectionName = mRecyclerView.scrollToPositionAtProgress((boundedY - top) / (bottom - top));
                     mPopup.setSectionName(sectionName);
                     mPopup.animateVisibility(!sectionName.isEmpty());
-                    mRecyclerView.invalidate(mPopup.updateFastScrollerBounds(mRecyclerView, mThumbPosition.y));
+                    mRecyclerView.invalidate(mPopup.updateFastScrollerBounds(mRecyclerView, lastY));
                 }
                 break;
             case MotionEvent.ACTION_UP:
