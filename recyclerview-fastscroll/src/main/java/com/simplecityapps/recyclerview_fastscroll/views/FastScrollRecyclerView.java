@@ -34,6 +34,7 @@ import com.simplecityapps.recyclerview_fastscroll.utils.Utils;
 public class FastScrollRecyclerView extends RecyclerView implements RecyclerView.OnItemTouchListener {
 
     private FastScroller mScrollbar;
+    private int prevOffset = 0;
 
     /**
      * The current scroll state of the recycler view.  We use this in onUpdateScrollbar()
@@ -217,22 +218,21 @@ public class FastScrollRecyclerView extends RecyclerView implements RecyclerView
         // Stop the scroller if it is scrolling
         stopScroll();
 
-        getCurScrollState(mScrollPosState);
+        getCurScrollState(mScrollPosState, true);
 
         float itemPos = itemCount * touchFraction;
 
         int availableScrollHeight = getAvailableScrollHeight(rowCount, mScrollPosState.rowHeight, 0);
+        mScrollPosState.rowTopOffset = (int) (availableScrollHeight * touchFraction * -1);
 
         //The exact position of our desired item
         int exactItemPos = (int) (availableScrollHeight * touchFraction);
 
-        //Scroll to the desired item. The offset used here is kind of hard to explain.
-        //If the position we wish to scroll to is, say, position 10.5, we scroll to position 10,
-        //and then offset by 0.5 * rowHeight. This is how we achieve smooth scrolling.
+        // Scroll to the item based on the position of the touch
         LinearLayoutManager layoutManager = ((LinearLayoutManager) getLayoutManager());
         //layoutManager.scrollToPositionWithOffset(spanCount * (exactItemPos / mScrollPosState.rowHeight),
         //         -(exactItemPos % mScrollPosState.rowHeight));
-        layoutManager.scrollToPositionWithOffset(0, (int) -(availableScrollHeight * touchFraction));
+        layoutManager.scrollToPositionWithOffset(0, -1 * exactItemPos);
 
 
         if (!(getAdapter() instanceof SectionedAdapter)) {
@@ -266,7 +266,7 @@ public class FastScrollRecyclerView extends RecyclerView implements RecyclerView
         }
 
         // Skip early if, there no child laid out in the container.
-        getCurScrollState(mScrollPosState);
+        getCurScrollState(mScrollPosState, false);
         if (mScrollPosState.rowIndex < 0) {
             mScrollbar.setThumbPosition(-1, -1);
             return;
@@ -278,15 +278,15 @@ public class FastScrollRecyclerView extends RecyclerView implements RecyclerView
     /**
      * Returns the current scroll state of the apps rows.
      */
-    private void getCurScrollState(ScrollPositionState stateOut) {
+    private void getCurScrollState(ScrollPositionState stateOut, boolean fromScrollToProgress) {
         stateOut.rowIndex = -1;
-        stateOut.rowTopOffset = -1;
         stateOut.rowHeight = -1;
 
         int itemCount = getAdapter().getItemCount();
 
         // Return early if there are no items, or no children.
         if (itemCount == 0 || getChildCount() == 0) {
+            stateOut.rowTopOffset = -1;
             return;
         }
 
@@ -297,7 +297,13 @@ public class FastScrollRecyclerView extends RecyclerView implements RecyclerView
         if (getLayoutManager() instanceof GridLayoutManager) {
             stateOut.rowIndex = stateOut.rowIndex / ((GridLayoutManager) getLayoutManager()).getSpanCount();
         }
-        stateOut.rowTopOffset = getLayoutManager().getDecoratedTop(firstChild);
+        if (!mScrollbar.isDragging()) {
+            stateOut.rowTopOffset = getLayoutManager().getDecoratedTop(firstChild);
+        }
+
+        if (prevOffset != stateOut.rowTopOffset) {
+            prevOffset = stateOut.rowTopOffset;
+        }
         int height = lastChild.getHeight() + getLayoutManager().getTopDecorationHeight(lastChild)
                 + getLayoutManager().getBottomDecorationHeight(lastChild);
         stateOut.rowHeight = height;
