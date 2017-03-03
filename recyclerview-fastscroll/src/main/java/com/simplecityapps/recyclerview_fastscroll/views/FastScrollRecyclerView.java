@@ -290,7 +290,7 @@ public class FastScrollRecyclerView extends RecyclerView implements RecyclerView
             return;
         }
 
-        View lastChild = getChildAt(getChildCount() - 1);
+        View nextChild = getChildAt(1);
         View firstChild = getChildAt(0);
 
         stateOut.rowIndex = getChildAdapterPosition(firstChild);
@@ -304,8 +304,8 @@ public class FastScrollRecyclerView extends RecyclerView implements RecyclerView
         if (prevOffset != stateOut.rowTopOffset) {
             prevOffset = stateOut.rowTopOffset;
         }
-        int height = lastChild.getHeight() + getLayoutManager().getTopDecorationHeight(lastChild)
-                + getLayoutManager().getBottomDecorationHeight(lastChild);
+        int height = nextChild.getHeight() + getLayoutManager().getTopDecorationHeight(nextChild)
+                + getLayoutManager().getBottomDecorationHeight(nextChild);
         stateOut.rowHeight = height;
     }
 
